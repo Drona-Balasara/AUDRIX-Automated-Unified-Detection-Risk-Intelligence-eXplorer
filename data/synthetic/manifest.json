@@ -1,0 +1,12 @@
+{
+  "entities": 6,
+  "assets": 210,
+  "alerts": 801,
+  "investigations": 512,
+  "investigation_actions": 3705,
+  "escalations": 156,
+  "remediations": 135,
+  "telemetry": 978,
+  "performance_metrics": 36,
+  "ground_truth": 26
+}

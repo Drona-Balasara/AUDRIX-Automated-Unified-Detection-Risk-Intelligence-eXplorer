@@ -11,19 +11,34 @@ React/TypeScript frontend, organized as a single monorepo.
 
 ## Current status
 
-**Phase 1 — Project Foundation.**
+**Phase 2 — Domain Data Model and Synthetic SOC Dataset.**
 
-Phase 1 establishes the architecture, tooling, and a working end-to-end
-baseline. The analytical capabilities described above are **not implemented
-yet**; they are introduced in later phases (see [Roadmap](#roadmap)). What
-exists today:
+Phase 1 established the architecture, tooling, and a working end-to-end baseline.
+Phase 2 builds the SAT-SA domain data model and a realistic, reproducible
+synthetic SOC dataset to develop and validate later analytics against. The
+analytical capabilities described above are still **not implemented**; they are
+introduced in later phases (see [Roadmap](#roadmap)). What exists today:
 
 - A FastAPI application with a versioned API and a `GET /api/v1/health` endpoint.
-- Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer
-  with a minimal system-metadata table.
+- Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer.
+- The full domain model as SQLAlchemy 2.x models: SOC entities and assets;
+  alerts, investigations and ordered investigation actions; escalations and
+  remediations; telemetry records; and periodic performance metrics — plus the
+  Phase 1 system-metadata table. Database initialization remains additive and
+  idempotent (no destructive resets).
+- A deterministic, seed-driven synthetic dataset generator
+  (`python -m app.datagen`) that emits a coherent multi-entity dataset to
+  `data/synthetic/` as typed CSV and JSON, together with a separate ground-truth
+  file of planted scenarios used only for evaluation.
 - A React frontend shell that reports live backend connectivity and nothing it
   cannot verify.
-- A backend test suite and a working frontend production build.
+- A backend test suite (foundation, domain model, data-quality invariants,
+  scenario verification, and reproducibility) and a working frontend build.
+
+The domain model is conceptually influenced by vendor-neutral event
+normalization (e.g. OCSF) but is **not** an OCSF implementation and makes no
+compatibility or certification claim. See
+[docs/data-model.md](docs/data-model.md).
 
 ## Architecture
 
@@ -34,7 +49,8 @@ sat-sa/
 │       ├── core/       configuration, logging
 │       ├── api/v1/     versioned HTTP routes
 │       ├── db/         engine, session, declarative base
-│       ├── models/     ORM models (minimal in Phase 1)
+│       ├── models/     ORM models (SOC domain model)
+│       ├── datagen/    synthetic dataset generator (seed-driven)
 │       ├── schemas/    Pydantic v2 response models
 │       ├── services/   application logic called by routes
 │       ├── analytics/  reserved for the later analytics pipeline
@@ -47,7 +63,9 @@ sat-sa/
 │       ├── hooks/      React hooks
 │       ├── types/      shared TypeScript types
 │       └── styles/     design tokens and global styles
-├── data/             local SQLite database location (generated; git-ignored)
+├── data/
+│   ├── synthetic/    generated synthetic dataset (CSV + JSON, tracked)
+│   └── *.db          local SQLite database location (generated; git-ignored)
 └── docs/             architecture and development documentation
 ```
 
@@ -116,6 +134,25 @@ npm run lint
 npm run build
 ```
 
+## Synthetic dataset
+
+Phase 2 ships a deterministic generator for a realistic multi-entity SOC
+dataset. From an activated backend environment:
+
+```bash
+cd backend
+python -m app.datagen                 # default seed, writes to ../data/synthetic
+python -m app.datagen --seed 20240601 # explicit seed (this is the default)
+```
+
+The same seed always reproduces an identical dataset. Output is written as typed
+CSV and JSON per table (entities, assets, alerts, investigations,
+investigation_actions, escalations, remediations, telemetry,
+performance_metrics) plus a separate `ground_truth` file. Ground truth is
+**evaluation data**: it describes planted scenarios and must not be exposed
+through production APIs or dashboards in later phases. See
+[docs/data-model.md](docs/data-model.md) for the schema and scenario catalog.
+
 ## Configuration
 
 All environment-sensitive values are read from the environment with safe local
@@ -129,9 +166,14 @@ and build output are all git-ignored.
 ## Roadmap
 
 Later phases build the analytics pipeline on top of this foundation. At a high
-level, and **not yet implemented**:
+level:
 
-- Ingestion and modeling of SOC operational evidence
+- **Done (Phase 2):** the SOC domain data model and a reproducible synthetic
+  dataset with planted ground-truth scenarios.
+
+Still **not yet implemented**:
+
+- Ingestion of SOC operational evidence into the database
 - Execution-gap and missing-evidence (negative-space) detection
 - Unusual-pattern / anomaly detection
 - Peer comparison and metric–risk divergence

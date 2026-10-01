@@ -60,6 +60,46 @@ npm run lint
 npm run build
 ```
 
+## Synthetic dataset generation
+
+The Phase 2 generator produces a deterministic, reproducible SOC dataset. Run it
+from an activated backend environment:
+
+```bash
+cd backend
+
+# Generate with the documented default seed (20240601) into ../data/synthetic
+python -m app.datagen
+
+# Explicit seed and/or output directory
+python -m app.datagen --seed 20240601
+python -m app.datagen --seed 7 --output /tmp/satsa-data
+
+# Fewer/more monthly reporting periods (default is 6)
+python -m app.datagen --periods 3
+```
+
+Each run is fully determined by the configuration plus the seed, so the same
+seed always reproduces an identical dataset. Files are written per table as
+typed CSV and JSON (`entities`, `assets`, `alerts`, `investigations`,
+`investigation_actions`, `escalations`, `remediations`, `telemetry`,
+`performance_metrics`), plus a `manifest.json` of row counts and a separate
+`ground_truth` file.
+
+`ground_truth.{csv,json}` is **evaluation data**: it records the planted
+scenarios (type, affected IDs, period, expected detection category, and a
+machine-readable reason). It must never be exposed through production APIs or
+dashboards in later phases.
+
+The generated CSV/JSON under `data/synthetic/` are tracked (they are safe to
+publish: fully synthetic, no real people, organizations, credentials, or
+addresses). Only generated SQLite `*.db` files under `data/` are git-ignored.
+
+The data-quality invariants, scenario conditions, reproducibility, and ORM
+round-trip are all covered by the backend test suite (`pytest`); see the
+`tests/test_datagen_*.py` modules. The schema and scenario catalog are
+documented in [data-model.md](data-model.md).
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

@@ -21,6 +21,10 @@ from app.main import create_app
 from app.models import SystemMetadata  # noqa: F401  (register models on Base.metadata)
 from app.services.system_service import ensure_system_metadata
 
+from app.datagen.config import DEFAULT_SEED, GenerationConfig
+from app.datagen.generator import Dataset, DatasetGenerator
+from app.datagen.writer import write_dataset
+
 
 @pytest.fixture()
 def db_session() -> Generator[Session, None, None]:
@@ -63,3 +67,17 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     test_client = TestClient(app, raise_server_exceptions=False)
     yield test_client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope="session")
+def generated_dataset() -> Dataset:
+    """A single deterministic dataset (default seed) reused across tests."""
+    return DatasetGenerator(GenerationConfig(seed=DEFAULT_SEED)).generate()
+
+
+@pytest.fixture(scope="session")
+def written_dataset_dir(tmp_path_factory: pytest.TempPathFactory, generated_dataset: Dataset):
+    """Write the generated dataset once to a temp dir and return the path."""
+    out_dir = tmp_path_factory.mktemp("synthetic")
+    write_dataset(generated_dataset, out_dir)
+    return out_dir

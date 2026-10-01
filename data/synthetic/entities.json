@@ -1,0 +1,74 @@
+[
+  {
+    "entity_id":"ENT-01",
+    "name":"SOC Entity 01",
+    "sector":"FINANCE",
+    "peer_group":"FINANCE",
+    "scale":"LARGE",
+    "asset_count_estimate":58,
+    "analyst_headcount":25,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  },
+  {
+    "entity_id":"ENT-02",
+    "name":"SOC Entity 02",
+    "sector":"FINANCE",
+    "peer_group":"FINANCE",
+    "scale":"MEDIUM",
+    "asset_count_estimate":28,
+    "analyst_headcount":10,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  },
+  {
+    "entity_id":"ENT-03",
+    "name":"SOC Entity 03",
+    "sector":"TECHNOLOGY",
+    "peer_group":"TECHNOLOGY",
+    "scale":"LARGE",
+    "asset_count_estimate":50,
+    "analyst_headcount":22,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  },
+  {
+    "entity_id":"ENT-04",
+    "name":"SOC Entity 04",
+    "sector":"TECHNOLOGY",
+    "peer_group":"TECHNOLOGY",
+    "scale":"MEDIUM",
+    "asset_count_estimate":25,
+    "analyst_headcount":12,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  },
+  {
+    "entity_id":"ENT-05",
+    "name":"SOC Entity 05",
+    "sector":"HEALTHCARE",
+    "peer_group":"HEALTHCARE",
+    "scale":"MEDIUM",
+    "asset_count_estimate":29,
+    "analyst_headcount":13,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  },
+  {
+    "entity_id":"ENT-06",
+    "name":"SOC Entity 06",
+    "sector":"HEALTHCARE",
+    "peer_group":"HEALTHCARE",
+    "scale":"SMALL",
+    "asset_count_estimate":11,
+    "analyst_headcount":5,
+    "created_at":"2023-09-03T00:00:00.000Z",
+    "data_period_start":"2024-01-01T00:00:00.000Z",
+    "data_period_end":"2024-07-01T00:00:00.000Z"
+  }
+]
