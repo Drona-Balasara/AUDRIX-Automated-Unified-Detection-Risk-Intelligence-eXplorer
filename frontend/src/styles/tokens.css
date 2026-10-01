@@ -1,0 +1,102 @@
+/*
+ * SAT-SA design tokens.
+ *
+ * A restrained, information-first visual system for a security operations
+ * analytics product. Color is used to communicate state and emphasis, not for
+ * decoration. The palette is neutral with a single desaturated accent; status
+ * colors are muted rather than neon. Light is the default; a dark variant is
+ * provided via prefers-color-scheme. Radii are small and shadows are subtle to
+ * avoid an "AI dashboard" look.
+ */
+
+:root {
+  /* Surfaces & structure */
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-border: #e3e6ea;
+  --color-border-strong: #cbd0d7;
+
+  /* Text */
+  --text-primary: #1a1e24;
+  --text-secondary: #4b535d;
+  --text-muted: #79818c;
+
+  /* Accent & state (desaturated, deliberately not neon) */
+  --accent: #275d7a;
+  --accent-contrast: #ffffff;
+  --success: #2b7050;
+  --warning: #8a641a;
+  --danger: #a63a2c;
+  --focus: #275d7a;
+
+  /* Status surface tints (subtle backgrounds for state chips) */
+  --success-surface: #e8f1ec;
+  --warning-surface: #f4eede;
+  --danger-surface: #f4e6e3;
+  --muted-surface: #eef0f3;
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Radius scale (small, functional) */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+
+  /* Typography scale */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", "Consolas", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --line-tight: 1.25;
+  --line-normal: 1.55;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(16, 22, 30, 0.06);
+  --shadow-md: 0 2px 8px rgba(16, 22, 30, 0.08);
+
+  /* Motion */
+  --transition-fast: 120ms ease;
+  --transition-base: 180ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #15181d;
+    --color-surface: #1b1f26;
+    --color-surface-elevated: #212630;
+    --color-border: #2c323b;
+    --color-border-strong: #3b424d;
+
+    --text-primary: #e7eaee;
+    --text-secondary: #aab2bd;
+    --text-muted: #7c848f;
+
+    --accent: #4f93b4;
+    --accent-contrast: #0e1116;
+    --success: #5aa888;
+    --warning: #c79a4e;
+    --danger: #d1685a;
+    --focus: #4f93b4;
+
+    --success-surface: #1c2a26;
+    --warning-surface: #2a2619;
+    --danger-surface: #2b1f1d;
+    --muted-surface: #232832;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.4);
+  }
+}

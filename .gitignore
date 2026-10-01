@@ -1,0 +1,61 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Environment / secrets ----
+# Ignore all .env files but keep the safe example templates.
+.env
+.env.*
+!.env.example
+!*/.env.example
+
+# ---- Databases (generated local SQLite) ----
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+data/*.db
+data/*.sqlite3
+
+# ---- Node / frontend ----
+node_modules/
+frontend/dist/
+dist/
+*.tsbuildinfo
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- IDE / editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini

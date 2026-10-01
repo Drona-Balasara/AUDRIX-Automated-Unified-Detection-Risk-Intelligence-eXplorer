@@ -1,0 +1,18 @@
+# SAT-SA backend dependencies (Phase 1).
+# Pinned to compatible-release ranges; see backend/README.md for rationale.
+# Verified against Python 3.12.
+
+# Web framework and ASGI server
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.30,<0.35
+
+# Data validation / typed settings (Pydantic v2)
+pydantic>=2.7,<3
+pydantic-settings>=2.3,<3
+
+# ORM (SQLAlchemy 2.x)
+SQLAlchemy>=2.0.30,<2.1
+
+# Testing
+pytest>=8.2,<9
+httpx>=0.27,<0.29

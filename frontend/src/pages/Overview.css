@@ -1,0 +1,24 @@
+.overview__intro {
+  margin-bottom: var(--space-6);
+  max-width: 60ch;
+}
+
+.overview__lead {
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: var(--line-normal);
+  margin-top: var(--space-3);
+}
+
+.overview__phase {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  background-color: var(--muted-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px var(--space-2);
+  margin-top: var(--space-4);
+}

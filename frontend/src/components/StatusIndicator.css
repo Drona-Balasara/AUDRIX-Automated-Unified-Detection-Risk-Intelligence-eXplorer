@@ -1,0 +1,50 @@
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 550;
+}
+
+.status-indicator__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--text-muted);
+}
+
+.status-indicator--success .status-indicator__dot {
+  background-color: var(--success);
+}
+.status-indicator--warning .status-indicator__dot {
+  background-color: var(--warning);
+}
+.status-indicator--danger .status-indicator__dot {
+  background-color: var(--danger);
+}
+
+.status-indicator--success .status-indicator__label {
+  color: var(--success);
+}
+.status-indicator--warning .status-indicator__label {
+  color: var(--warning);
+}
+.status-indicator--danger .status-indicator__label {
+  color: var(--danger);
+}
+
+/* The loading dot pulses gently; disabled under reduced-motion by global.css. */
+.status-indicator--neutral .status-indicator__dot {
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
