@@ -11,16 +11,19 @@ React/TypeScript frontend, organized as a single monorepo.
 
 ## Current status
 
-**Phase 2 — Domain Data Model and Synthetic SOC Dataset.**
+**Phase 3 — Data Ingestion, Validation, and Normalization.**
 
 Phase 1 established the architecture, tooling, and a working end-to-end baseline.
-Phase 2 builds the SAT-SA domain data model and a realistic, reproducible
-synthetic SOC dataset to develop and validate later analytics against. The
-analytical capabilities described above are still **not implemented**; they are
-introduced in later phases (see [Roadmap](#roadmap)). What exists today:
+Phase 2 built the SAT-SA domain data model and a realistic, reproducible
+synthetic SOC dataset. Phase 3 adds the trusted ingestion boundary that accepts
+externally produced datasets, validates and normalizes them against canonical
+per-type schemas, and persists them transactionally. The analytical
+capabilities described above are still **not implemented**; they are introduced
+in later phases (see [Roadmap](#roadmap)). What exists today:
 
 - A FastAPI application with a versioned API and a `GET /api/v1/health` endpoint.
-- Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer.
+- Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer
+  with SQLite foreign-key enforcement enabled on every connection.
 - The full domain model as SQLAlchemy 2.x models: SOC entities and assets;
   alerts, investigations and ordered investigation actions; escalations and
   remediations; telemetry records; and periodic performance metrics — plus the
@@ -30,10 +33,17 @@ introduced in later phases (see [Roadmap](#roadmap)). What exists today:
   (`python -m app.datagen`) that emits a coherent multi-entity dataset to
   `data/synthetic/` as typed CSV and JSON, together with a separate ground-truth
   file of planted scenarios used only for evaluation.
+- An ingestion pipeline under `/api/v1/ingestion` (validate / import /
+  dataset-types / audit-record) that accepts CSV and JSON only, requires an
+  explicit allowlisted dataset type, applies one shared validation engine to
+  both formats, normalizes to canonical typed values (timezone-aware UTC
+  timestamps, authoritative enums), and imports all-or-nothing with a safe audit
+  record. See [docs/ingestion.md](docs/ingestion.md).
 - A React frontend shell that reports live backend connectivity and nothing it
   cannot verify.
 - A backend test suite (foundation, domain model, data-quality invariants,
-  scenario verification, and reproducibility) and a working frontend build.
+  scenario verification, reproducibility, and the full ingestion/validation
+  surface) and a working frontend build.
 
 The domain model is conceptually influenced by vendor-neutral event
 normalization (e.g. OCSF) but is **not** an OCSF implementation and makes no
@@ -170,10 +180,12 @@ level:
 
 - **Done (Phase 2):** the SOC domain data model and a reproducible synthetic
   dataset with planted ground-truth scenarios.
+- **Done (Phase 3):** ingestion of SOC operational evidence — CSV/JSON upload,
+  schema and semantic validation, canonical normalization, and all-or-nothing
+  transactional import with an audit record.
 
 Still **not yet implemented**:
 
-- Ingestion of SOC operational evidence into the database
 - Execution-gap and missing-evidence (negative-space) detection
 - Unusual-pattern / anomaly detection
 - Peer comparison and metric–risk divergence

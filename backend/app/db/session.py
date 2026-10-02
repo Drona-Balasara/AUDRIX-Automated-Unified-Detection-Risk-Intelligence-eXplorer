@@ -12,6 +12,8 @@ from collections.abc import Generator
 from pathlib import Path
 
 from sqlalchemy import create_engine
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
@@ -21,6 +23,24 @@ from app.db.base import Base
 logger = get_logger(__name__)
 
 settings = get_settings()
+
+
+def enable_sqlite_fk(target_engine: Engine) -> None:
+    """Enforce SQLite foreign keys for every connection of ``target_engine``.
+
+    SQLite does not enforce foreign keys unless ``PRAGMA foreign_keys=ON`` is set
+    per connection. Enabling it here means a failed/invalid ingestion import can
+    never leave dangling references, and the pragma is applied before any
+    transaction begins. No-op for non-SQLite backends.
+    """
+    if not target_engine.url.get_backend_name().startswith("sqlite"):
+        return
+
+    @event.listens_for(target_engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, _connection_record):  # noqa: ANN001
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 def _make_engine_kwargs(database_url: str) -> dict[str, object]:
@@ -49,6 +69,7 @@ def _ensure_sqlite_dir(database_url: str) -> None:
 _ensure_sqlite_dir(settings.database_url)
 
 engine = create_engine(settings.database_url, **_make_engine_kwargs(settings.database_url))
+enable_sqlite_fk(engine)
 
 # ``expire_on_commit=False`` keeps returned objects usable after commit, which is
 # convenient for request handlers that serialize an object immediately.

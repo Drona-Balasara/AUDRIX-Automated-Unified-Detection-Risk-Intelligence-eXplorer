@@ -100,6 +100,40 @@ round-trip are all covered by the backend test suite (`pytest`); see the
 `tests/test_datagen_*.py` modules. The schema and scenario catalog are
 documented in [data-model.md](data-model.md).
 
+## Data ingestion
+
+Phase 3 adds a validation/normalization/import pipeline under
+`/api/v1/ingestion`. The dataset type is always named explicitly by the client;
+the server never guesses it from file contents. See
+[ingestion.md](ingestion.md) for the full reference (formats, canonical
+schemas, normalization rules, transaction semantics, and the error format).
+
+Quick local usage against a running backend:
+
+```bash
+# Report-only: validate without touching the database.
+curl -s -F "file=@../data/synthetic/entities.csv" \
+     -F "dataset_type=entities" \
+     http://localhost:8000/api/v1/ingestion/validate | python -m json.tool
+
+# Transactional import (all-or-nothing). Load parents before children.
+curl -s -F "file=@../data/synthetic/entities.json" \
+     -F "dataset_type=entities" -F "mode=replace" \
+     http://localhost:8000/api/v1/ingestion/import | python -m json.tool
+
+# List supported dataset types and their columns.
+curl -s http://localhost:8000/api/v1/ingestion/dataset-types | python -m json.tool
+```
+
+The ingestion test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_ingestion_validation.py   # format-neutral engine rules
+pytest tests/test_ingestion_api.py          # HTTP boundaries + safe errors
+pytest tests/test_ingestion_integration.py  # full nine-table synthetic import
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

@@ -59,6 +59,16 @@ class Settings(BaseSettings):
 
     log_level: str = "INFO"
 
+    # Maximum accepted upload size for ingestion, in bytes. Enforced at the
+    # application layer (streamed bounded read) regardless of client-declared
+    # Content-Length. Default 25 MiB is ample for local synthetic datasets.
+    max_upload_bytes: int = 25 * 1024 * 1024
+
+    # Maximum number of per-row validation errors returned in an API response.
+    # The full error count is always reported; detail is capped so a malformed
+    # file cannot force an unbounded response body.
+    max_reported_errors: int = 100
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_cors_origins(cls, value: object) -> object:

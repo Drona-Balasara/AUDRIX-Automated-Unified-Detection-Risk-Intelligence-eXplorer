@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db.base import Base
-from app.db.session import get_db
+from app.db.session import enable_sqlite_fk, get_db
 from app.main import create_app
 from app.models import SystemMetadata  # noqa: F401  (register models on Base.metadata)
 from app.services.system_service import ensure_system_metadata
@@ -34,6 +34,7 @@ def db_session() -> Generator[Session, None, None]:
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+    enable_sqlite_fk(engine)
     Base.metadata.create_all(bind=engine)
     TestingSessionLocal = sessionmaker(
         bind=engine, autoflush=False, expire_on_commit=False, class_=Session
@@ -81,3 +82,63 @@ def written_dataset_dir(tmp_path_factory: pytest.TempPathFactory, generated_data
     out_dir = tmp_path_factory.mktemp("synthetic")
     write_dataset(generated_dataset, out_dir)
     return out_dir
+
+
+# --- Ingestion test helpers -------------------------------------------------
+
+import csv as _csv  # noqa: E402
+import io as _io  # noqa: E402
+import json as _json  # noqa: E402
+
+
+def make_csv(rows: list[dict[str, object]], columns: list[str]) -> bytes:
+    """Serialize rows to CSV bytes with an explicit column order."""
+    buffer = _io.StringIO()
+    writer = _csv.DictWriter(buffer, fieldnames=columns)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow({c: ("" if row.get(c) is None else row.get(c)) for c in columns})
+    return buffer.getvalue().encode("utf-8")
+
+
+def make_json(rows: list[dict[str, object]]) -> bytes:
+    """Serialize rows to a JSON array of objects."""
+    return _json.dumps(rows).encode("utf-8")
+
+
+@pytest.fixture()
+def seed_entity(db_session: Session):
+    """Insert one entity + asset so child-dataset imports have valid references."""
+    from datetime import datetime, timezone
+
+    from app.models import Asset, SocEntity
+
+    now = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    db_session.add(
+        SocEntity(
+            entity_id="ENT-01",
+            name="Seed Entity",
+            sector="FINANCE",
+            peer_group="FINANCE",
+            scale="MEDIUM",
+            asset_count_estimate=10,
+            analyst_headcount=5,
+            created_at=now,
+            data_period_start=now,
+            data_period_end=now,
+        )
+    )
+    db_session.add(
+        Asset(
+            asset_id="AST-00001",
+            entity_id="ENT-01",
+            name="Seed Asset",
+            category="SERVER",
+            criticality="HIGH",
+            monitoring_expected=True,
+            expected_telemetry="AUTHENTICATION",
+            created_at=now,
+        )
+    )
+    db_session.commit()
+    return db_session

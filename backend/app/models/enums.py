@@ -184,3 +184,29 @@ class TelemetrySourceStatus(StrEnum):
     HEALTHY = "HEALTHY"
     DEGRADED = "DEGRADED"
     SILENT = "SILENT"
+
+
+class ImportMode(StrEnum):
+    """How an ingested dataset is applied to the database.
+
+    ``APPEND`` inserts new rows and rejects any identifier already present.
+    ``REPLACE`` deletes existing rows of the same dataset type first, then
+    inserts; it fails (and rolls back) if dependent rows still reference them,
+    so it can never silently orphan data.
+    """
+
+    APPEND = "APPEND"
+    REPLACE = "REPLACE"
+
+
+class ImportStatus(StrEnum):
+    """Terminal status recorded for an ingestion operation (audit trail)."""
+
+    # Validation-only request that produced no database change.
+    VALIDATED = "VALIDATED"
+    # Validation failed; nothing was imported.
+    REJECTED = "REJECTED"
+    # Import succeeded and committed.
+    COMPLETED = "COMPLETED"
+    # Import began but was rolled back; the database is unchanged.
+    ROLLED_BACK = "ROLLED_BACK"

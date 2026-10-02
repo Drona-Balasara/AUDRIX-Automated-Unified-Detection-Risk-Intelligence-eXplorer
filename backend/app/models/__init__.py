@@ -11,6 +11,7 @@ No ingestion or analytics behavior lives here; these are data definitions only.
 
 from __future__ import annotations
 
+from app.models.ingestion import ImportRecord
 from app.models.monitoring import PerformanceMetric, TelemetryRecord
 from app.models.operations import (
     Alert,
@@ -33,4 +34,5 @@ __all__ = [
     "Remediation",
     "TelemetryRecord",
     "PerformanceMetric",
+    "ImportRecord",
 ]
