@@ -151,6 +151,27 @@ pytest tests/test_execution_gap.py              # per-rule unit tests
 pytest tests/test_execution_gap_integration.py  # synthetic-data detection + oracle
 ```
 
+## Negative-space detection
+
+Phase 5 adds the second analytic: a deterministic, read-only negative-space
+detector under `app/analytics/negative_space`. Like Phase 4 it has no HTTP
+surface — it is a service-layer entry point, `run_negative_space_detection(session)`,
+that returns structured, strictly observational findings. It reports *absences*
+of expected monitoring evidence (critical asset with no telemetry; telemetry
+that disappeared mid-window), emitting a finding only once the data establishes
+the evidence was expected. See
+[negative-space-detection.md](negative-space-detection.md) for the rule
+registry, configuration, finding schema, baseline/dataset-boundary handling, and
+false-positive considerations.
+
+Its test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_negative_space.py              # per-rule unit tests
+pytest tests/test_negative_space_integration.py  # synthetic-data detection + oracle
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

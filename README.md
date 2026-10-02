@@ -11,17 +11,20 @@ React/TypeScript frontend, organized as a single monorepo.
 
 ## Current status
 
-**Phase 4 — Execution-Gap Detection.**
+**Phase 5 — Negative-Space Detection.**
 
 Phase 1 established the architecture, tooling, and a working end-to-end baseline.
 Phase 2 built the SAT-SA domain data model and a realistic, reproducible
 synthetic SOC dataset. Phase 3 added the trusted ingestion boundary that accepts
 externally produced datasets, validates and normalizes them against canonical
-per-type schemas, and persists them transactionally. Phase 4 adds the first
+per-type schemas, and persists them transactionally. Phase 4 added the first
 analytic: a deterministic, read-only execution-gap detector that reports
-observable deviations in the SOC operational record. The remaining analytical
-capabilities described above are still **not implemented**; they are introduced
-in later phases (see [Roadmap](#roadmap)). What exists today:
+observable deviations in how recorded work was handled. Phase 5 adds the second
+analytic: a deterministic, read-only negative-space detector that reports
+observable *absences of expected monitoring evidence* — but only where existing
+data establishes that the evidence was reasonably expected. The remaining
+analytical capabilities described above are still **not implemented**; they are
+introduced in later phases (see [Roadmap](#roadmap)). What exists today:
 
 - A FastAPI application with a versioned API and a `GET /api/v1/health` endpoint.
 - Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer
@@ -46,6 +49,12 @@ in later phases (see [Roadmap](#roadmap)). What exists today:
   rules against the normalized domain records and returns structured, strictly
   observational findings for later evidence/confidence phases. See
   [docs/execution-gap-detection.md](docs/execution-gap-detection.md).
+- A negative-space detector under `app/analytics/negative_space` (service layer,
+  no HTTP surface) that reports observable absences of expected monitoring
+  evidence — a critical monitored asset with no telemetry, or a monitored asset
+  whose telemetry disappeared mid-window — emitting a finding only once an
+  expectation of that evidence has been established from the data. See
+  [docs/negative-space-detection.md](docs/negative-space-detection.md).
 - A React frontend shell that reports live backend connectivity and nothing it
   cannot verify.
 - A backend test suite (foundation, domain model, data-quality invariants,
@@ -70,7 +79,7 @@ sat-sa/
 │       ├── datagen/    synthetic dataset generator (seed-driven)
 │       ├── schemas/    Pydantic v2 response models
 │       ├── services/   application logic called by routes
-│       ├── analytics/  supervisory analytics (execution-gap detection)
+│       ├── analytics/  supervisory analytics (execution-gap + negative-space)
 │       └── utils/      small helpers
 ├── frontend/         React + TypeScript client (Vite)
 │   └── src/
@@ -195,10 +204,15 @@ level:
   closed without escalation; acknowledged high/critical alert never
   investigated; recurring confirmed alerts never remediated) as structured
   findings. It assigns no risk or confidence scores — those are later phases.
+- **Done (Phase 5):** negative-space detection — a deterministic, read-only rule
+  engine that reports observable absences of expected monitoring evidence
+  (critical monitored asset with no telemetry; monitored asset whose telemetry
+  disappeared mid-window) as structured findings, emitted only once the data
+  establishes the evidence was expected. It, too, assigns no risk or confidence
+  scores.
 
 Still **not yet implemented**:
 
-- Missing-evidence (negative-space) detection
 - Unusual-pattern / anomaly detection
 - Peer comparison and metric–risk divergence
 - Investigation fingerprinting and evidence-backed findings
