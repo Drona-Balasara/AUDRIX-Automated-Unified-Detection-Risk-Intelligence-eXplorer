@@ -134,6 +134,23 @@ pytest tests/test_ingestion_api.py          # HTTP boundaries + safe errors
 pytest tests/test_ingestion_integration.py  # full nine-table synthetic import
 ```
 
+## Execution-gap detection
+
+Phase 4 adds the first analytic: a deterministic, read-only execution-gap
+detector under `app/analytics/execution_gap`. It has no HTTP surface — it is a
+service-layer entry point, `run_execution_gap_detection(session)`, that returns
+structured, strictly observational findings. See
+[execution-gap-detection.md](execution-gap-detection.md) for the rule registry,
+configuration, finding schema, and false-positive considerations.
+
+Its test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_execution_gap.py              # per-rule unit tests
+pytest tests/test_execution_gap_integration.py  # synthetic-data detection + oracle
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

@@ -11,13 +11,15 @@ React/TypeScript frontend, organized as a single monorepo.
 
 ## Current status
 
-**Phase 3 — Data Ingestion, Validation, and Normalization.**
+**Phase 4 — Execution-Gap Detection.**
 
 Phase 1 established the architecture, tooling, and a working end-to-end baseline.
 Phase 2 built the SAT-SA domain data model and a realistic, reproducible
-synthetic SOC dataset. Phase 3 adds the trusted ingestion boundary that accepts
+synthetic SOC dataset. Phase 3 added the trusted ingestion boundary that accepts
 externally produced datasets, validates and normalizes them against canonical
-per-type schemas, and persists them transactionally. The analytical
+per-type schemas, and persists them transactionally. Phase 4 adds the first
+analytic: a deterministic, read-only execution-gap detector that reports
+observable deviations in the SOC operational record. The remaining analytical
 capabilities described above are still **not implemented**; they are introduced
 in later phases (see [Roadmap](#roadmap)). What exists today:
 
@@ -39,6 +41,11 @@ in later phases (see [Roadmap](#roadmap)). What exists today:
   both formats, normalizes to canonical typed values (timezone-aware UTC
   timestamps, authoritative enums), and imports all-or-nothing with a safe audit
   record. See [docs/ingestion.md](docs/ingestion.md).
+- An execution-gap detector under `app/analytics/execution_gap` (service layer,
+  no HTTP surface) that evaluates a small registry of deterministic, read-only
+  rules against the normalized domain records and returns structured, strictly
+  observational findings for later evidence/confidence phases. See
+  [docs/execution-gap-detection.md](docs/execution-gap-detection.md).
 - A React frontend shell that reports live backend connectivity and nothing it
   cannot verify.
 - A backend test suite (foundation, domain model, data-quality invariants,
@@ -63,7 +70,7 @@ sat-sa/
 │       ├── datagen/    synthetic dataset generator (seed-driven)
 │       ├── schemas/    Pydantic v2 response models
 │       ├── services/   application logic called by routes
-│       ├── analytics/  reserved for the later analytics pipeline
+│       ├── analytics/  supervisory analytics (execution-gap detection)
 │       └── utils/      small helpers
 ├── frontend/         React + TypeScript client (Vite)
 │   └── src/
@@ -183,10 +190,15 @@ level:
 - **Done (Phase 3):** ingestion of SOC operational evidence — CSV/JSON upload,
   schema and semantic validation, canonical normalization, and all-or-nothing
   transactional import with an audit record.
+- **Done (Phase 4):** execution-gap detection — a deterministic, read-only rule
+  engine that reports observable execution deviations (confirmed critical alert
+  closed without escalation; acknowledged high/critical alert never
+  investigated; recurring confirmed alerts never remediated) as structured
+  findings. It assigns no risk or confidence scores — those are later phases.
 
 Still **not yet implemented**:
 
-- Execution-gap and missing-evidence (negative-space) detection
+- Missing-evidence (negative-space) detection
 - Unusual-pattern / anomaly detection
 - Peer comparison and metric–risk divergence
 - Investigation fingerprinting and evidence-backed findings
