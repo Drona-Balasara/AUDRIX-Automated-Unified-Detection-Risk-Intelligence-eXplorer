@@ -26,6 +26,20 @@ far:
   ``PerformanceMetric`` KPIs; emits neutral findings for supervisory review
   without making any assertion about intent or cause.
 
-Reserved for later phases (not yet implemented): investigation fingerprinting,
-and evidence/confidence/prioritization scoring.
+- ``investigation_fingerprinting`` (Phase 8): deterministic, read-only
+  investigation-sequence analysis.  Represents each investigation as an ordered
+  tuple of ``ActionType`` values (a *fingerprint*), then runs three analytically
+  distinct detectors: ``IF-REP-001`` flags entity-period windows where a
+  substantial number of investigations share an identical fingerprint (Potential
+  Template-Driven Investigation Pattern); ``IF-DEV-002`` flags individual
+  investigations whose sequence deviates materially from the entity's
+  plurality-baseline fingerprint via normalized Levenshtein edit distance
+  (Potential Investigation Sequence Deviation); ``IF-MEA-003`` flags closed
+  HIGH/CRITICAL investigations that contain neither ``VALIDATE`` nor
+  ``EVIDENCE_REVIEW`` (Potential Missing Investigation Action).  No external
+  dependencies are added; edit distance is a dependency-free stdlib
+  implementation.
+
+Reserved for later phases (not yet implemented): evidence/confidence/
+prioritization scoring.
 """

@@ -225,6 +225,28 @@ pytest tests/test_metric_risk_divergence.py              # unit tests (44)
 pytest tests/test_metric_risk_divergence_integration.py  # synthetic-data detection + oracle (16)
 ```
 
+## Investigation fingerprinting
+
+Phase 8 adds a fourth-generation deterministic, read-only analytic under
+`app/analytics/investigation_fingerprinting`. The service entry point is
+`run_investigation_fingerprinting(session)`. It represents each investigation
+as an ordered action-type fingerprint and runs three detectors: IF-REP-001
+(Potential Template-Driven Investigation Pattern), IF-DEV-002 (Potential
+Investigation Sequence Deviation), and IF-MEA-003 (Potential Missing
+Investigation Action). Sequence similarity uses normalized Levenshtein edit
+distance, implemented without any external dependency. No schema migration is
+required. See [investigation-fingerprinting.md](investigation-fingerprinting.md)
+for the fingerprint definition, detector logic, thresholds, calibration,
+missing-data handling, limitations, and synthetic-dataset evaluation.
+
+Its test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_investigation_fingerprinting.py              # unit tests (73)
+pytest tests/test_investigation_fingerprinting_integration.py  # synthetic-data detection + oracle (16)
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process
