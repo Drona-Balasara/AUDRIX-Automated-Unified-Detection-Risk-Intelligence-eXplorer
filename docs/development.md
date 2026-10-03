@@ -247,6 +247,32 @@ pytest tests/test_investigation_fingerprinting.py              # unit tests (73)
 pytest tests/test_investigation_fingerprinting_integration.py  # synthetic-data detection + oracle (16)
 ```
 
+## Evidence and confidence
+
+Phase 9 adds the shared evidence and confidence layer under
+`app/analytics/evidence/`. The service entry points are
+`annotate_execution_gap(result)`, `annotate_negative_space(result)`,
+`annotate_anomaly(result)`, `annotate_peer_benchmark(result)`,
+`annotate_metric_risk_divergence(result)`, and
+`annotate_fingerprint(result)`. Each returns an `AnnotatedResult` wrapper
+carrying the original frozen result plus an `evidence_map` keyed by
+`finding_key`. Every finding from Phases 4–8 gets a `FindingEvidence` entry
+with structured `EvidenceRef` objects, a categorical `EvidenceConfidence`
+(HIGH/MODERATE/LOW), and the `ConfidenceFactor` list that explains why
+confidence is limited. Evidence is built from already-loaded context with no
+additional database queries. Absent evidence is represented as an `ABSENCE`
+source type, never fabricated. See
+[evidence-and-confidence.md](evidence-and-confidence.md) for the full schema,
+confidence aggregation rules, per-analytic builder logic, and limitations.
+
+Its test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_evidence.py              # unit tests (77)
+pytest tests/test_evidence_integration.py  # cross-phase integration tests (28)
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

@@ -40,6 +40,18 @@ far:
   dependencies are added; edit distance is a dependency-free stdlib
   implementation.
 
-Reserved for later phases (not yet implemented): evidence/confidence/
+- ``evidence`` (Phase 9): shared evidence and confidence layer usable by all
+  SAT-SA analytics.  For every finding produced by Phases 4–8, an
+  ``AnnotatedResult`` wrapper carries a parallel ``evidence_map`` keyed by
+  ``finding_key``.  Each ``FindingEvidence`` entry holds an ordered tuple of
+  ``EvidenceRef`` objects (source type, stable record ID, role, period label,
+  reason) plus a categorical ``EvidenceConfidence`` (HIGH / MODERATE / LOW)
+  and the specific ``ConfidenceFactor`` list that led to it.  Evidence is built
+  from already-loaded context with no additional database queries; source record
+  IDs are verified against real ORM rows in integration tests; absent evidence
+  is represented as an ``ABSENCE`` source type rather than a fabricated record
+  ID.  Confidence reflects data sufficiency, not risk or severity.
+
+Reserved for later phases (not yet implemented): supervisory review queue and
 prioritization scoring.
 """
