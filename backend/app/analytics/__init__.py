@@ -19,6 +19,13 @@ far:
   of its genuinely comparable, same-period peers, with the entity's own value
   excluded and an explicit insufficient-peers status when too few peers exist.
 
-Reserved for later phases (not yet implemented): metric-risk divergence,
-investigation fingerprinting, and evidence/confidence/prioritization scoring.
+- ``metric_risk_divergence`` (Phase 7): deterministic, read-only detection of
+  reporting periods where headline SOC performance metrics show an improving
+  trend while underlying operational-quality indicators materially deteriorate.
+  Uses direction-adjusted least-squares trend scoring over the reported
+  ``PerformanceMetric`` KPIs; emits neutral findings for supervisory review
+  without making any assertion about intent or cause.
+
+Reserved for later phases (not yet implemented): investigation fingerprinting,
+and evidence/confidence/prioritization scoring.
 """

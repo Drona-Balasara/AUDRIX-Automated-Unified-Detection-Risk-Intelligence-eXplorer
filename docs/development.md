@@ -202,6 +202,29 @@ pytest tests/test_peer_benchmark.py              # robust-stat / peer-rule unit 
 pytest tests/test_anomaly_peer_integration.py    # synthetic-data detection + oracle
 ```
 
+## Metric-risk divergence
+
+Phase 7 adds a third-generation deterministic, read-only analytic under
+`app/analytics/metric_risk_divergence`. The service entry point is
+`run_metric_risk_divergence(session)`. It identifies reporting periods where
+headline SOC performance metrics show an improving trend while underlying
+operational-quality indicators materially deteriorate. The finding type is
+"Potential Metric-Risk Divergence" — the analytic describes a pattern in the
+data and does not assert intent, cause, or fault on any individual or team.
+See [metric-risk-divergence.md](metric-risk-divergence.md) for the metric
+registry, direction definitions, trend method, thresholds, missing-data
+handling, limitations, and the synthetic-dataset evaluation.
+
+No new dependencies are introduced; the analytic uses only the standard library
+and existing project code. No schema migration is required. Its test suites run
+as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_metric_risk_divergence.py              # unit tests (44)
+pytest tests/test_metric_risk_divergence_integration.py  # synthetic-data detection + oracle (16)
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process
