@@ -11,7 +11,7 @@ React/TypeScript frontend, organized as a single monorepo.
 
 ## Current status
 
-**Phase 5 — Negative-Space Detection.**
+**Phase 6 — Anomaly Detection & Peer Benchmarking.**
 
 Phase 1 established the architecture, tooling, and a working end-to-end baseline.
 Phase 2 built the SAT-SA domain data model and a realistic, reproducible
@@ -19,12 +19,19 @@ synthetic SOC dataset. Phase 3 added the trusted ingestion boundary that accepts
 externally produced datasets, validates and normalizes them against canonical
 per-type schemas, and persists them transactionally. Phase 4 added the first
 analytic: a deterministic, read-only execution-gap detector that reports
-observable deviations in how recorded work was handled. Phase 5 adds the second
+observable deviations in how recorded work was handled. Phase 5 added the second
 analytic: a deterministic, read-only negative-space detector that reports
 observable *absences of expected monitoring evidence* — but only where existing
-data establishes that the evidence was reasonably expected. The remaining
-analytical capabilities described above are still **not implemented**; they are
-introduced in later phases (see [Roadmap](#roadmap)). What exists today:
+data establishes that the evidence was reasonably expected. Phase 6 adds two
+more deterministic, read-only analytics: an unsupervised **anomaly detector**
+(scikit-learn IsolationForest, fixed seed) that flags entity-reporting-period
+observations unusual relative to the modelled population, and a **peer
+benchmark** that compares an entity-period's reported KPIs against the robust
+baseline of its genuinely comparable, same-period peers. Both expose
+observational signals only — never a SAT-SA risk score or performance verdict.
+The remaining analytical capabilities described above are still **not
+implemented**; they are introduced in later phases (see [Roadmap](#roadmap)).
+What exists today:
 
 - A FastAPI application with a versioned API and a `GET /api/v1/health` endpoint.
 - Typed configuration, centralized logging, and a SQLAlchemy 2.x database layer
@@ -55,6 +62,19 @@ introduced in later phases (see [Roadmap](#roadmap)). What exists today:
   whose telemetry disappeared mid-window — emitting a finding only once an
   expectation of that evidence has been established from the data. See
   [docs/negative-space-detection.md](docs/negative-space-detection.md).
+- An anomaly detector under `app/analytics/anomaly` (service layer, no HTTP
+  surface) that fits a scikit-learn IsolationForest (fixed `random_state`) over
+  a small, leakage-free set of entity-reporting-period features and flags
+  observations unusual relative to the modelled population, returning an
+  explicit insufficient-sample result when too few observations exist and a
+  raw/normalised anomaly signal rather than a risk score. See
+  [docs/anomaly-detection.md](docs/anomaly-detection.md).
+- A peer benchmark under `app/analytics/peer_benchmark` (service layer, no HTTP
+  surface) that compares each entity-period's reported KPIs against the robust
+  (median/scaled-MAD) baseline of its genuinely comparable, same-period peers —
+  excluding the subject's own value, never pooling incompatible groups, and
+  emitting an explicit insufficient-peers status rather than a misleading
+  deviation. See [docs/peer-benchmarking.md](docs/peer-benchmarking.md).
 - A React frontend shell that reports live backend connectivity and nothing it
   cannot verify.
 - A backend test suite (foundation, domain model, data-quality invariants,
@@ -79,7 +99,7 @@ sat-sa/
 │       ├── datagen/    synthetic dataset generator (seed-driven)
 │       ├── schemas/    Pydantic v2 response models
 │       ├── services/   application logic called by routes
-│       ├── analytics/  supervisory analytics (execution-gap + negative-space)
+│       ├── analytics/  supervisory analytics (execution-gap, negative-space, anomaly, peer-benchmark)
 │       └── utils/      small helpers
 ├── frontend/         React + TypeScript client (Vite)
 │   └── src/
@@ -104,6 +124,7 @@ and services own database and domain interactions. See
 | Area        | Choice                                                     |
 | ----------- | ---------------------------------------------------------- |
 | Backend     | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x, SQLite  |
+| Analytics   | scikit-learn (IsolationForest); NumPy / pandas (datagen)   |
 | Backend dev | Uvicorn, pytest, HTTPX / FastAPI TestClient                |
 | Frontend    | React 18, TypeScript, Vite 7                               |
 | Styling     | Modern CSS with design tokens (CSS custom properties)      |
@@ -210,11 +231,16 @@ level:
   disappeared mid-window) as structured findings, emitted only once the data
   establishes the evidence was expected. It, too, assigns no risk or confidence
   scores.
+- **Done (Phase 6):** unsupervised anomaly detection (scikit-learn
+  IsolationForest, fixed seed, explicit insufficient-sample handling) over
+  leakage-free entity-reporting-period features, and peer benchmarking (robust
+  median/scaled-MAD comparison against genuinely comparable, same-period peers,
+  with a documented zero-MAD fallback and explicit insufficient-peers status).
+  Both emit observational signals only — no risk score or performance verdict.
 
 Still **not yet implemented**:
 
-- Unusual-pattern / anomaly detection
-- Peer comparison and metric–risk divergence
+- Metric–risk divergence
 - Investigation fingerprinting and evidence-backed findings
 - A supervisory review queue and the operational dashboard
 

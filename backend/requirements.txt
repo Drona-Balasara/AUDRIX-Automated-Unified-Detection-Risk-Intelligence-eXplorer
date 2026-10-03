@@ -27,3 +27,11 @@ pandas>=2.2,<3
 # Multipart form parsing (Phase 3). Required by FastAPI/Starlette to accept
 # uploaded files via multipart/form-data on the ingestion endpoints.
 python-multipart>=0.0.9,<0.1
+
+# Unsupervised anomaly detection (Phase 6). scikit-learn supplies the
+# IsolationForest estimator used by app/analytics/anomaly. The lower bound is
+# the smallest release providing the stable IsolationForest API this code
+# relies on; the upper bound guards against a breaking 2.x major. Peer
+# benchmarking adds no dependency (robust statistics use the stdlib).
+scikit-learn>=1.5,<2
+

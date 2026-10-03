@@ -172,6 +172,36 @@ pytest tests/test_negative_space.py              # per-rule unit tests
 pytest tests/test_negative_space_integration.py  # synthetic-data detection + oracle
 ```
 
+## Anomaly detection and peer benchmarking
+
+Phase 6 adds two more deterministic, read-only analytics under
+`app/analytics/anomaly` and `app/analytics/peer_benchmark`. Like Phases 4–5 they
+have no HTTP surface — they are service-layer entry points,
+`run_anomaly_detection(session)` and `run_peer_benchmark(session)`, that return
+structured, strictly observational results.
+
+- **Anomaly detection** fits a scikit-learn `IsolationForest` (fixed
+  `random_state`) over entity-reporting-period feature observations and flags
+  observations that are unusual relative to the modelled population. It exposes a
+  raw/normalised anomaly signal and a decision — never a risk score — and returns
+  an explicit insufficient-sample result when too few observations exist. See
+  [anomaly-detection.md](anomaly-detection.md).
+- **Peer benchmarking** compares each entity-period's reported KPIs against the
+  robust (median/scaled-MAD) baseline of its genuinely comparable, same-period
+  peers, with the subject's own value excluded and an explicit insufficient-peers
+  status when too few peers exist. See [peer-benchmarking.md](peer-benchmarking.md).
+
+Phase 6 adds exactly one dependency, `scikit-learn` (for `IsolationForest`); peer
+benchmarking uses only the standard library. Their test suites run as part of
+`pytest`:
+
+```bash
+cd backend
+pytest tests/test_anomaly.py                     # feature/guard/determinism unit tests
+pytest tests/test_peer_benchmark.py              # robust-stat / peer-rule unit tests
+pytest tests/test_anomaly_peer_integration.py    # synthetic-data detection + oracle
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process
