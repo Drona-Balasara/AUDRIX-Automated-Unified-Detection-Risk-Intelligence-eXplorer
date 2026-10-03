@@ -65,4 +65,9 @@ far:
   The ORM model lives in ``app/analytics/review_queue/models.py`` and is
   registered on ``Base.metadata`` via ``init_db()`` — no migration tool
   required.
+
+Phase 11 — FastAPI API layer (``app/api/v1/routes/``) — exposes the
+existing analytical capabilities through a clean, thin HTTP interface.
+Analytical findings remain read-only through the API; only review-queue
+state may be changed.  See ``docs/api.md`` for the full endpoint inventory.
 """

@@ -300,6 +300,47 @@ pytest tests/test_review_queue.py              # unit tests (79)
 pytest tests/test_review_queue_integration.py  # integration tests (38)
 ```
 
+## API layer (Phase 11)
+
+Phase 11 exposes the existing analytical capabilities through a clean,
+thin FastAPI HTTP layer.  Analytical findings remain **read-only** through
+the API; only review-queue state transitions may be written.  The API
+layer performs request validation, dependency wiring, response serialization,
+filtering, pagination, and error translation — all analytics logic stays in
+the existing packages.
+
+Start the backend server:
+
+```bash
+cd backend && uvicorn app.main:app --reload --port 8000
+```
+
+The interactive API docs are available at `http://localhost:8000/docs`.
+
+New endpoints (all under `/api/v1`):
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/entities` | List all SOC entities (paginated) |
+| `GET` | `/entities/{entity_id}` | Get one entity |
+| `POST` | `/assessment/run` | Run all analytics, build evidence, refresh queue |
+| `GET` | `/findings` | List findings (paginated, filterable) |
+| `GET` | `/findings/{finding_key}` | Get one finding with evidence |
+| `GET` | `/queue` | List review queue items (paginated, filterable) |
+| `GET` | `/queue/summary` | Queue aggregate counts |
+| `GET` | `/queue/{queue_id}` | Get one queue item |
+| `PATCH` | `/queue/{queue_id}/status` | Transition review status |
+
+See [api.md](api.md) for the full reference including request/response schemas,
+filter parameters, pagination, error codes, and limitations.
+
+Its test suite runs as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_api_phase11.py   # 64 API tests
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

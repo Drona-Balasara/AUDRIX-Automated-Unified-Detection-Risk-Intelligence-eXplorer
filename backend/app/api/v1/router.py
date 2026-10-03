@@ -8,8 +8,12 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1.routes import health, ingestion
+from app.api.v1.routes import assessment, entities, findings, health, ingestion, queue
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["system"])
 api_router.include_router(ingestion.router)
+api_router.include_router(entities.router)
+api_router.include_router(assessment.router)
+api_router.include_router(findings.router)
+api_router.include_router(queue.router)
