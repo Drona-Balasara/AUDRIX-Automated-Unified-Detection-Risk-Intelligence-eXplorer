@@ -273,6 +273,33 @@ pytest tests/test_evidence.py              # unit tests (77)
 pytest tests/test_evidence_integration.py  # cross-phase integration tests (28)
 ```
 
+## Supervisory Review Queue
+
+Phase 10 adds the supervisory review queue under
+`app/analytics/review_queue/`. The service entry point is
+`build_review_queue(session, bundle)`. It accepts a `FindingsBundle` of all
+Phase 4–8 annotated results (from Phase 9) and upserts one `ReviewQueueItem`
+per finding into the `review_queue_item` database table. Priority is separate
+from confidence: `QueuePriority` (CRITICAL / HIGH / MEDIUM / LOW) is derived
+from finding type, alert severity, evidence confidence, and evidence count
+using a transparent, documented, rule-based algorithm — no ML. The queue is
+idempotent: re-running over unchanged findings preserves existing review
+state. Changed findings reset their item to OPEN. Status lifecycle: OPEN →
+IN_REVIEW → REVIEWED / DISMISSED (with reopen). The `ReviewQueueItem` ORM
+model is registered on `Base.metadata` via `init_db()` — no separate
+migration tool is required. See
+[supervisory-review-queue.md](supervisory-review-queue.md) for the full
+design, priority logic, idempotency rules, status lifecycle, limitations, and
+how future API/UI phases consume the queue.
+
+Its test suites run as part of `pytest`:
+
+```bash
+cd backend
+pytest tests/test_review_queue.py              # unit tests (79)
+pytest tests/test_review_queue_integration.py  # integration tests (38)
+```
+
 ## Environment configuration
 
 - Backend variables use the `SATSA_` prefix and are read from the process

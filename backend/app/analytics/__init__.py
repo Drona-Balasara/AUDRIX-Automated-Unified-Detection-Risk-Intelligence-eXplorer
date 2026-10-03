@@ -52,6 +52,17 @@ far:
   is represented as an ``ABSENCE`` source type rather than a fabricated record
   ID.  Confidence reflects data sufficiency, not risk or severity.
 
-Reserved for later phases (not yet implemented): supervisory review queue and
-prioritization scoring.
+- ``review_queue`` (Phase 10): deterministic, persistent Supervisory Review
+  Queue that converts completed analytical findings (Phases 4–8) and
+  evidence/confidence information (Phase 9) into a structured human-review
+  workflow.  ``build_review_queue(session, bundle)`` upserts a
+  ``ReviewQueueItem`` for every finding, computing a transparent rule-based
+  ``QueuePriority`` (CRITICAL / HIGH / MEDIUM / LOW) that is separate from
+  ``EvidenceConfidence``.  The queue is idempotent: repeated runs over
+  unchanged data preserve existing review state; material changes to a
+  finding reset its item to OPEN conservatively.  Status lifecycle:
+  OPEN → IN_REVIEW → REVIEWED / DISMISSED (with reopen supported).
+  The ORM model lives in ``app/analytics/review_queue/models.py`` and is
+  registered on ``Base.metadata`` via ``init_db()`` — no migration tool
+  required.
 """

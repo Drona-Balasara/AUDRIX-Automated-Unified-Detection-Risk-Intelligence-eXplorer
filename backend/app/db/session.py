@@ -93,6 +93,8 @@ def init_db() -> None:
     avoiding import cycles.
     """
     from app import models  # noqa: F401  (import for side-effect: model registration)
+    # Phase 10: register ReviewQueueItem on Base.metadata.
+    from app.analytics.review_queue.models import ReviewQueueItem  # noqa: F401
     from app.services.system_service import ensure_system_metadata
 
     Base.metadata.create_all(bind=engine)
