@@ -459,3 +459,48 @@ with the synthetic dataset.
 - Entity Assessment page links to Finding Explorer rather than grouping by period
   in a chart (no Recharts installed; visual analytics deferred).
 - No authentication; V1 is local-deployment only.
+
+## Testing and validation (Phase 13)
+
+Phase 13 validates the complete SAT-SA system against its intended behaviour
+across analytics, evidence, queue, API, and dashboard layers.
+
+### Validation commands
+
+```bash
+# Full backend regression (649 tests)
+cd backend && .venv/Scripts/python -m pytest
+
+# Phase 13 scenario validation tests only (32 tests)
+cd backend && .venv/Scripts/python -m pytest tests/test_phase13_validation.py -v
+
+# Frontend tests (36)
+cd frontend && npm test
+
+# Frontend type check / lint / build
+cd frontend && npm run type-check && npm run lint && npm run build
+
+# Dependency audit
+cd frontend && npm audit
+```
+
+### Validation report
+
+See [docs/validation-report.md](validation-report.md) for:
+
+- Synthetic ground-truth scenario validation matrix (9 scenarios)
+- Detection coverage: 8/8 detectable scenarios detected, 0 missed
+- Determinism verification: all analytics produce stable finding keys
+- Evidence integrity: no fabricated source-record IDs
+- Review queue: idempotency, lifecycle transitions, state preservation
+- API error safety: no stack traces/internals in responses
+- Frontend functional validation results
+- Dependency/security audit findings and classifications
+- Performance observations
+- Known limitations and release-readiness assessment
+
+### Phase 13 test file
+
+`backend/tests/test_phase13_validation.py` — 32 integration/validation tests
+covering scenario coverage, determinism, evidence integrity, queue lifecycle,
+IF-DEV-002 volume, and API boundary safety.
