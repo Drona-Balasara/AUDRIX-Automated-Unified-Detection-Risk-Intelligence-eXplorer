@@ -24,9 +24,9 @@ export function AppShell({ children }: AppShellProps) {
     <div className="app-shell">
       <header className="app-header" role="banner">
         <div className="app-header__brand">
-          <span className="app-header__name">SAT-SA</span>
+          <span className="app-header__name">AUDRIX</span>
           <span className="app-header__descriptor">
-            Security Assessment &amp; Supervisory Analytics
+            Automated Unified Detection &amp; Risk Intelligence eXplorer
           </span>
         </div>
       </header>
@@ -52,7 +52,7 @@ export function AppShell({ children }: AppShellProps) {
       <main className="app-shell__main">{children}</main>
 
       <footer className="app-shell__footer">
-        SAT-SA — Security Assessment &amp; Supervisory Analytics
+        AUDRIX — Automated Unified Detection &amp; Risk Intelligence eXplorer
       </footer>
     </div>
   );

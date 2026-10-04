@@ -8,8 +8,8 @@ def test_settings_defaults_load() -> None:
 
     settings = Settings()
     assert settings.service_id == "sat-sa-api"
-    assert settings.app_name == "SAT-SA"
-    assert settings.app_descriptor == "Security Assessment & Supervisory Analytics"
+    assert settings.app_name == "AUDRIX"
+    assert settings.app_descriptor == "Automated Unified Detection & Risk Intelligence eXplorer"
     assert settings.database_url.startswith("sqlite")
     assert isinstance(settings.cors_origins, list)
     assert settings.cors_origins  # non-empty default

@@ -224,7 +224,7 @@ export function CommandCenter() {
       </section>
 
       <p className="disclaimer">
-        SAT-SA identifies potential patterns in operational evidence for
+        AUDRIX identifies potential patterns in operational evidence for
         supervisory review. It does not make autonomous risk decisions,
         confirm misconduct, or replace human analytical judgment.
       </p>

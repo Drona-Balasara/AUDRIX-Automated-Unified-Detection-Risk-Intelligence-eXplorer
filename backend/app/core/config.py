@@ -35,8 +35,8 @@ class Settings(BaseSettings):
 
     # Identity / presentation. ``service_id`` is a stable machine identifier that
     # clients and the health endpoint can rely on; it is not a secret.
-    app_name: str = "SAT-SA"
-    app_descriptor: str = "Security Assessment & Supervisory Analytics"
+    app_name: str = "AUDRIX"
+    app_descriptor: str = "Automated Unified Detection & Risk Intelligence eXplorer"
     service_id: str = "sat-sa-api"
     version: str = "0.1.0"
 

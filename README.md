@@ -1,6 +1,19 @@
-# SAT-SA — Security Assessment & Supervisory Analytics
+# AUDRIX — Automated Unified Detection & Risk Intelligence eXplorer
 
-SAT-SA is an evidence-driven security operations supervisory analytics platform.
+**Evidence-Driven Security Assessment & Supervisory Analytics Platform**
+
+---
+
+> Copyright © 2026 Drona-Balasara. All Rights Reserved.
+>
+> This repository contains proprietary software and source code.
+> Unauthorized copying, modification, distribution, reproduction,
+> or commercial use of this software, in whole or in part, is
+> prohibited without prior written permission from the copyright holder.
+
+---
+
+AUDRIX is an evidence-driven security operations supervisory analytics platform.
 Its purpose is to assess SOC operational evidence, identify execution gaps and
 missing expected evidence, detect unusual operational patterns, compare
 comparable entities, and surface evidence-backed findings that require human
@@ -249,5 +262,9 @@ functionality actually lands — it does not describe features before they exist
 
 ## License
 
-Released under the [MIT License](LICENSE).
+Copyright © 2026 Drona-Balasara. All Rights Reserved.
+
+This repository contains proprietary software and source code. Unauthorized copying,
+modification, distribution, reproduction, or commercial use of this software, in whole
+or in part, is prohibited without prior written permission from the copyright holder.
 

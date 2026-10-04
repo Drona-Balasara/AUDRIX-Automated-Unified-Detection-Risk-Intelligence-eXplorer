@@ -12,9 +12,9 @@ export function Header({ environment }: HeaderProps) {
   return (
     <header className="app-header">
       <div className="app-header__brand">
-        <h1 className="app-header__name">SAT-SA</h1>
+        <h1 className="app-header__name">AUDRIX</h1>
         <p className="app-header__descriptor">
-          Security Assessment &amp; Supervisory Analytics
+          Automated Unified Detection &amp; Risk Intelligence eXplorer
         </p>
       </div>
       {environment ? (
