@@ -1,6 +1,7 @@
 /* Global base styles. Component-specific styles live alongside components. */
 
 @import "./tokens.css";
+@import "../pages/shared.css";
 
 *,
 *::before,

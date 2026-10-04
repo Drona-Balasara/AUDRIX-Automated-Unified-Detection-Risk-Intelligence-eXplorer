@@ -394,3 +394,68 @@ Only `.env.example` files are tracked by Git. Never commit real `.env` files.
 The project uses a checkpoint-based workflow: each phase is implemented, tested,
 reviewed, and declared complete before its work is committed and pushed. Do not
 push incomplete phase work.
+
+## React dashboard (Phase 12)
+
+Phase 12 adds the complete SAT-SA React/TypeScript dashboard under `frontend/src/`.
+
+### Pages
+
+| Route | Component | Description |
+|---|---|---|
+| `/` | `CommandCenter` | Assessment state, queue summary, priority distribution, navigation shortcuts |
+| `/entities` | `EntityListPage` | Paginated entity list with period information |
+| `/entities/:entityId` | `EntityDetailPage` | Entity info + findings for that entity |
+| `/findings` | `FindingExplorer` | Paginated, server-side-filtered findings table (all analytics) |
+| `/findings/*` | `FindingDetail` | Single finding with full evidence and confidence |
+| `/queue` | `ReviewQueue` | Supervisory queue with inline status transitions (PATCH API) |
+
+### Key architecture
+
+- **API client**: `src/services/api.ts` — typed fetch functions for all Phase 11 endpoints, `AbortController` cleanup
+- **Data fetching**: `src/hooks/useFetch.ts` — loading/success/error state hook with abort on unmount/dep-change
+- **Routing**: `react-router-dom` v6 (`BrowserRouter`)
+- **Testing**: `vitest` + `@testing-library/react` + `@testing-library/jest-dom`
+- **Styling**: plain CSS modules extending existing design tokens (`src/styles/tokens.css`); no Tailwind, no Recharts
+- **State**: local React state only; no Redux or global state library
+
+### Environment configuration
+
+```bash
+cd frontend
+cp .env.example .env.local      # set VITE_API_BASE_URL if backend is not at localhost:8000
+npm run dev                     # Vite dev server at http://localhost:5173
+npm run build                   # TypeScript check + Vite production build
+npm run type-check              # TypeScript check only
+npm run lint                    # ESLint
+npm test                        # vitest run-once (36 tests)
+npm run test:watch              # vitest watch mode
+```
+
+`VITE_API_BASE_URL` defaults to `http://localhost:8000/api/v1`. This is the only
+frontend environment variable; it is an intentionally client-exposed public API
+URL, not a secret.
+
+### Running both services
+
+```bash
+# Terminal 1 — backend
+cd backend && uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — frontend
+cd frontend && npm run dev
+```
+
+Open `http://localhost:5173`. Run `POST /api/v1/assessment/run` from the
+Command Center "Run Assessment" button to populate findings and the review queue
+with the synthetic dataset.
+
+### Known frontend limitations
+
+- Assessment execution is synchronous; the "Run Assessment" button blocks the
+  browser while the backend processes all analytics (~0.5–2 s on synthetic data).
+- Findings are re-derived on each `/findings` request (no cache). Acceptable for
+  local V1 use.
+- Entity Assessment page links to Finding Explorer rather than grouping by period
+  in a chart (no Recharts installed; visual analytics deferred).
+- No authentication; V1 is local-deployment only.
