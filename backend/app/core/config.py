@@ -72,11 +72,12 @@ class Settings(BaseSettings):
     @field_validator("database_url", mode="before")
     @classmethod
     def _normalize_database_url(cls, value: object) -> object:
-        """Handle Render postgres:// scheme and fallback to DATABASE_URL."""
+        """Handle Render postgres:// scheme and fallback to DATABASE_URL or default SQLite."""
         import os
 
-        # If value is default SQLite or empty, check if DATABASE_URL was provided by Render
-        if not value or str(value) == f"sqlite:///{DEFAULT_DB_PATH.as_posix()}":
+        if not value:
+            value = os.getenv("DATABASE_URL") or f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
+        elif str(value) == f"sqlite:///{DEFAULT_DB_PATH.as_posix()}":
             render_db = os.getenv("DATABASE_URL")
             if render_db:
                 value = render_db
@@ -86,7 +87,7 @@ class Settings(BaseSettings):
             # Render / Heroku supply postgres:// URLs, but SQLAlchemy 1.4+ requires postgresql://
             if value.startswith("postgres://"):
                 return value.replace("postgres://", "postgresql://", 1)
-        return value
+        return str(value) if value else f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
 
     @field_validator("cors_origins", mode="before")
     @classmethod

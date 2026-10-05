@@ -65,15 +65,17 @@ PART 1: DEPLOY BACKEND TO RENDER (FASTAPI PYTHON SERVICE)
                           | [VERY IMPORTANT: Do not leave blank! Enter 'backend']
    Runtime                | Python 3
    Build Command          | pip install -r requirements.txt
-   Start Command          | uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   Start Command          | python start.py
    Instance Type          | Free
    -----------------------------------------------------------------------------
+   (Note: 'python start.py' runs uvicorn and binds directly to Render's dynamic $PORT)
 
 5. Scroll down and click the "Advanced" button or open the "Environment Variables" section:
    Add these Environment Variables:
    -----------------------------------------------------------------------------
    KEY                    | VALUE
    -----------------------------------------------------------------------------
+   PYTHONUNBUFFERED       | 1
    PYTHON_VERSION         | 3.12.8
    SATSA_ENVIRONMENT      | production
    SATSA_LOG_LEVEL        | INFO

@@ -4,13 +4,15 @@ services:
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    startCommand: python start.py
     healthCheckPath: /api/v1/health
     envVars:
       - key: SATSA_ENVIRONMENT
         value: production
       - key: SATSA_LOG_LEVEL
         value: INFO
+      - key: PYTHONUNBUFFERED
+        value: "1"
       - key: PYTHON_VERSION
         value: 3.12.8
       - key: SATSA_CORS_ORIGINS
