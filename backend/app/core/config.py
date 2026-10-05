@@ -49,8 +49,8 @@ class Settings(BaseSettings):
     database_url: str = Field(default=f"sqlite:///{DEFAULT_DB_PATH.as_posix()}")
 
     # CORS: explicit local Vite dev-server origins by default. Tightened or
-    # widened per environment through SATSA_CORS_ORIGINS (comma-separated).
-    cors_origins: list[str] = Field(
+    # widened per environment through SATSA_CORS_ORIGINS (comma-separated or JSON list).
+    cors_origins: list[str] | str = Field(
         default_factory=lambda: [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
@@ -89,15 +89,21 @@ class Settings(BaseSettings):
                 return value.replace("postgres://", "postgresql://", 1)
         return str(value) if value else f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", mode="after")
     @classmethod
-    def _split_cors_origins(cls, value: object) -> object:
-        """Allow CORS origins to be provided as a comma-separated string.
+    def _split_cors_origins(cls, value: list[str] | str) -> list[str]:
+        """Allow CORS origins to be provided as a comma-separated string, JSON list, or list."""
+        import json
 
-        Environment variables are strings, so a value like
-        ``http://a:5173,http://b:5173`` is split into a list here.
-        """
         if isinstance(value, str):
+            value = value.strip()
+            if value.startswith("[") and value.endswith("]"):
+                try:
+                    parsed = json.loads(value)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if item]
+                except Exception:
+                    pass
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
 
