@@ -25,11 +25,19 @@ logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize the database foundation on startup."""
-    from app.db.session import init_db
+    """Initialize the database foundation on startup and seed if empty."""
+    from app.db.session import init_db, SessionLocal
+    from app.services.seed_service import seed_synthetic_data
 
     logger.info("Starting %s (%s) in %s mode.", settings.app_name, settings.version, settings.environment)
     init_db()
+
+    try:
+        with SessionLocal() as session:
+            seed_synthetic_data(session, force=False)
+    except Exception:
+        logger.exception("Auto-seed during startup encountered an error; continuing startup.")
+
     yield
     logger.info("Shutting down %s.", settings.app_name)
 
@@ -77,6 +85,16 @@ def create_app() -> FastAPI:
             "service": settings.service_id,
             "endpoint": "/api/v1/health",
         }
+
+    @app.post("/api/v1/seed", tags=["system"], summary="Seed synthetic local dataset and run assessment")
+    @app.get("/api/v1/seed", tags=["system"], summary="Seed synthetic local dataset and run assessment (GET alias)")
+    def seed_endpoint(force: bool = False) -> dict[str, object]:
+        """Manually trigger ingestion of the local synthetic dataset and initial assessment."""
+        from app.db.session import SessionLocal
+        from app.services.seed_service import seed_synthetic_data
+
+        with SessionLocal() as session:
+            return seed_synthetic_data(session, force=force)
 
     app.include_router(api_router, prefix="/api/v1")
     return app
