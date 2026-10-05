@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: audrix-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: SATSA_ENVIRONMENT
+        value: production
+      - key: SATSA_LOG_LEVEL
+        value: INFO
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: SATSA_CORS_ORIGINS
+        sync: false

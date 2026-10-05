@@ -1,0 +1,280 @@
+================================================================================
+           AUDRIX: COMPLETE STEP-BY-STEP DEPLOYMENT GUIDE (RENDER + VERCEL)
+================================================================================
+
+Target Architecture:
+  - Backend  : Render (FastAPI / Python Web Service + Optional PostgreSQL)
+  - Frontend : Vercel (React + Vite Client-Side Single Page Application)
+
+Why this order?
+  You should deploy the BACKEND on Render FIRST, because the Frontend on Vercel
+  needs your live Render URL during its build! Once both are live, you add your
+  Vercel URL to the Backend CORS settings.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. Pre-Deployment: Push Your Code to GitHub
+2. PART 1: Deploy Backend to Render (Step-by-Step)
+3. PART 2: (Optional) Add Free PostgreSQL Database on Render
+4. PART 3: Deploy Frontend to Vercel (Step-by-Step)
+5. PART 4: The Final Handshake (Connect CORS)
+6. Summary of All Environment Variables
+7. Troubleshooting & Common Gotchas
+
+================================================================================
+STEP 1: PRE-DEPLOYMENT: PUSH YOUR CODE TO GITHUB
+================================================================================
+
+Both Render and Vercel will pull your code directly from your GitHub repository.
+Before starting, ensure all the latest changes and files are pushed to GitHub:
+
+1. Open PowerShell or Terminal in your project root:
+   git add .
+   git commit -m "Configure deployment files and CORS/API resilience"
+   git push origin main
+
+2. Verify on github.com that your repository contains the root folders:
+   - backend/
+   - frontend/
+   - render.yaml
+   - DEPLOYMENT_GUIDE.txt
+
+================================================================================
+PART 1: DEPLOY BACKEND TO RENDER (FASTAPI PYTHON SERVICE)
+================================================================================
+
+1. Go to https://render.com and sign up or log in.
+   (Tip: Sign in using your GitHub account for 1-click repository access.)
+
+2. On the Render Dashboard, click the blue button:
+   "New +"  --->  select "Web Service"
+
+3. Connect your GitHub repository:
+   - Search for: AUDRIX-Automated-Unified-Detection-Risk-Intelligence-eXplorer
+   - Click "Connect".
+
+4. Fill in the deployment form with EXACTLY these values:
+   -----------------------------------------------------------------------------
+   FIELD NAME             | WHAT TO ENTER / SELECT
+   -----------------------------------------------------------------------------
+   Name                   | audrix-backend
+   Region                 | Choose the region closest to you (e.g., Oregon, Frankfurt, Singapore)
+   Branch                 | main
+   Root Directory         | backend
+                          | [VERY IMPORTANT: Do not leave blank! Enter 'backend']
+   Runtime                | Python 3
+   Build Command          | pip install -r requirements.txt
+   Start Command          | uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   Instance Type          | Free
+   -----------------------------------------------------------------------------
+
+5. Scroll down and click the "Advanced" button or open the "Environment Variables" section:
+   Add these Environment Variables:
+   -----------------------------------------------------------------------------
+   KEY                    | VALUE
+   -----------------------------------------------------------------------------
+   PYTHON_VERSION         | 3.12.8
+   SATSA_ENVIRONMENT      | production
+   SATSA_LOG_LEVEL        | INFO
+   SATSA_CORS_ORIGINS     | http://localhost:5173
+                          | (We will add your live Vercel URL here in Part 4)
+   -----------------------------------------------------------------------------
+
+6. Set the Health Check Path (under Advanced settings):
+   - Health Check Path: /api/v1/health
+
+7. Click the blue button at the bottom:
+   "Create Web Service"
+
+8. Render will now start building:
+   - It will install Python dependencies from backend/requirements.txt
+   - When finished, you will see: "==> Your service is live 🎉"
+   - Look at the top of the page under the service name. You will see your
+     public URL, for example:
+     https://audrix-backend-xxxx.onrender.com
+
+9. TEST YOUR LIVE BACKEND:
+   - Open a new browser tab and visit:
+     https://audrix-backend-xxxx.onrender.com/
+     You should see:
+     {"name":"AUDRIX","status":"online","version":"0.1.0","docs":"/docs","health":"/api/v1/health"}
+
+   - Test the health endpoint:
+     https://audrix-backend-xxxx.onrender.com/api/v1/health
+     You should see:
+     {"service":"sat-sa-api","status":"ok","version":"0.1.0","environment":"production","database":"ok"}
+
+   - KEEP THIS URL COPIED! You will need it for Vercel in Part 3.
+
+================================================================================
+PART 2: (RECOMMENDED) ADD PERSISTENT POSTGRESQL ON RENDER
+================================================================================
+
+By default, without a database URL, AUDRIX uses local SQLite. However, on
+Render's free tier, local disks reset when the service restarts.
+To keep your data permanently, Render provides a free PostgreSQL database:
+
+1. In the Render Dashboard, click:
+   "New +"  --->  select "PostgreSQL"
+
+2. Fill in:
+   - Name: audrix-db
+   - Database: sat_sa
+   - User: satsa_admin
+   - Region: Select the SAME region as your audrix-backend service!
+   - Plan: Free
+
+3. Click "Create Database" and wait ~1 minute until it says "Available".
+
+4. Scroll down to the "Connections" section:
+   - Find "Internal Database URL". Click "Copy".
+   - (It looks like: postgres://satsa_admin:password@dpg-xxxx-a:5432/sat_sa)
+
+5. Connect it to your backend:
+   - Go back to your "audrix-backend" Web Service on Render.
+   - Click "Environment" in the left sidebar.
+   - Click "Add Environment Variable":
+     KEY   : SATSA_DATABASE_URL
+     VALUE : <Paste the Internal Database URL you copied>
+   - Click "Save Changes".
+   - Render will automatically restart your backend. The backend code will
+     automatically create all tables on startup!
+
+   *Note: Even though Render gives a 'postgres://' URL, our backend code has
+    been configured to automatically normalize it to 'postgresql://' for
+    SQLAlchemy 2.x, so you don't have to edit the URL string at all!
+
+================================================================================
+PART 3: DEPLOY FRONTEND TO VERCEL (REACT + VITE APP)
+================================================================================
+
+1. Go to https://vercel.com and sign up or log in.
+   (Tip: Sign in with GitHub.)
+
+2. On the Vercel Dashboard, click:
+   "Add New..."  --->  select "Project"
+
+3. In the "Import Git Repository" list:
+   - Find: AUDRIX-Automated-Unified-Detection-Risk-Intelligence-eXplorer
+   - Click "Import".
+
+4. Configure the Project:
+   -----------------------------------------------------------------------------
+   SETTING                | VALUE
+   -----------------------------------------------------------------------------
+   Project Name           | audrix-frontend (or any name you prefer)
+   Framework Preset       | Vite
+   Root Directory         | Click "Edit" and choose:  frontend
+                          | [VERY IMPORTANT: Select 'frontend' and click Continue!]
+   Build Command          | npm run build  (Leave default)
+   Output Directory       | dist           (Leave default)
+   Install Command        | npm install    (Leave default)
+   -----------------------------------------------------------------------------
+
+5. Add Environment Variables:
+   - Expand the "Environment Variables" section.
+   - Add the following variable:
+     KEY   : VITE_API_BASE_URL
+     VALUE : https://audrix-backend-xxxx.onrender.com/api/v1
+             (Replace with YOUR actual Render backend URL from Part 1)
+
+     *Note: If you forget to add '/api/v1' at the end, don't worry! Our frontend
+      code has a built-in helper that automatically appends '/api/v1' if missing.
+
+6. Click the blue button:
+   "Deploy"
+
+7. Wait ~45 seconds while Vercel builds the app.
+   - You will see celebratory confetti and "Congratulations! Your project is deployed."
+   - Click on the screenshot preview or "Visit" to view your live frontend!
+   - Copy your live Vercel URL (e.g., https://audrix-frontend.vercel.app).
+
+================================================================================
+PART 4: THE FINAL HANDSHAKE (ALLOW FRONTEND IN BACKEND CORS)
+================================================================================
+
+Now that both backend and frontend are live, the backend must be told to
+accept requests from your new Vercel domain. Without this step, your browser
+will block API calls with a "CORS error".
+
+1. Go to https://dashboard.render.com
+2. Click on your "audrix-backend" Web Service.
+3. Click "Environment" in the left sidebar.
+4. Locate the variable: SATSA_CORS_ORIGINS
+5. Edit its value to include your Vercel URL (comma-separated, NO trailing slash):
+   VALUE: https://audrix-frontend.vercel.app,http://localhost:5173
+
+   Example:
+   If your Vercel URL is https://audrix-web.vercel.app:
+   SATSA_CORS_ORIGINS = https://audrix-web.vercel.app,http://localhost:5173
+
+6. Click "Save Changes".
+7. Render will automatically redeploy the backend with the new CORS policy (~20 seconds).
+8. Refresh your Vercel app in the browser:
+   Everything is now 100% CONNECTED and FULLY OPERATIONAL! 🎉
+
+================================================================================
+SUMMARY OF ALL ENVIRONMENT VARIABLES
+================================================================================
+
+[BACKEND (RENDER) ENVIRONMENT VARIABLES]
+--------------------------------------------------------------------------------
+VARIABLE NAME        | RECOMMENDED VALUE     | PURPOSE
+--------------------------------------------------------------------------------
+PYTHON_VERSION       | 3.12.8                | Sets exact Python version on Render
+SATSA_ENVIRONMENT    | production            | Puts app in production mode
+SATSA_LOG_LEVEL      | INFO                  | Clean production logging
+SATSA_CORS_ORIGINS   | https://<your-vercel> | Whitelists frontend URL for browser API calls
+SATSA_DATABASE_URL   | (Optional) Postgres   | PostgreSQL URL if using Render Postgres
+--------------------------------------------------------------------------------
+
+[FRONTEND (VERCEL) ENVIRONMENT VARIABLES]
+--------------------------------------------------------------------------------
+VARIABLE NAME        | RECOMMENDED VALUE     | PURPOSE
+--------------------------------------------------------------------------------
+VITE_API_BASE_URL    | https://<render>/api/v1| Points React client to Render backend
+--------------------------------------------------------------------------------
+
+================================================================================
+ALTERNATIVE: 1-CLICK RENDER BLUEPRINT (render.yaml)
+================================================================================
+
+If you prefer automated setup on Render instead of clicking through manual forms:
+1. In the Render Dashboard, click "New +" -> "Blueprint".
+2. Select your repository: AUDRIX-Automated-Unified-Detection-Risk-Intelligence-eXplorer.
+3. Render will read the 'render.yaml' file in the root of the repo and automatically:
+   - Configure the Web Service
+   - Set the root directory to 'backend'
+   - Set the build & start commands
+   - Set Python version 3.12.8
+   - Set the health check path to '/api/v1/health'
+4. Click "Apply".
+
+================================================================================
+TROUBLESHOOTING & COMMON MISTAKES
+================================================================================
+
+1. "Failed to fetch" or 500 error when clicking in Frontend:
+   - Free tier Render services "spin down" (go to sleep) after 15 minutes of inactivity.
+   - The very first request after waking up takes about 30-50 seconds.
+   - Simply wait 40 seconds and refresh your Vercel page. Once the backend is awake,
+     all requests are fast and responsive!
+
+2. "CORS Error" in browser console (F12 -> Console):
+   - You forgot to add your Vercel URL to SATSA_CORS_ORIGINS in Render.
+   - Go to Render -> audrix-backend -> Environment.
+   - Make sure SATSA_CORS_ORIGINS exactly matches your Vercel URL:
+     https://your-project.vercel.app (do NOT put a slash '/' at the very end).
+
+3. "Page Not Found (404)" when refreshing a page on Vercel:
+   - React is a Single Page Application (SPA).
+   - Our repository includes 'frontend/vercel.json' with rewrite rules so that
+     direct URL visits and page reloads automatically route to index.html without 404.
+
+4. Changed VITE_API_BASE_URL in Vercel but the app still calls the old backend:
+   - Vite injects 'VITE_' variables during the BUILD process.
+   - If you change an environment variable on Vercel, you MUST click:
+     "Deployments" -> "..." on the latest deployment -> "Redeploy"
+     for the new variable to take effect!
+================================================================================

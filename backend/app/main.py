@@ -60,6 +60,24 @@ def create_app() -> FastAPI:
             content={"detail": "An internal error occurred."},
         )
 
+    @app.get("/", tags=["system"], summary="Root health & status")
+    def root() -> dict[str, str]:
+        return {
+            "name": settings.app_name,
+            "status": "online",
+            "version": settings.version,
+            "docs": "/docs",
+            "health": "/api/v1/health",
+        }
+
+    @app.get("/health", tags=["system"], summary="Root health check alias")
+    def health_root() -> dict[str, str]:
+        return {
+            "status": "ok",
+            "service": settings.service_id,
+            "endpoint": "/api/v1/health",
+        }
+
     app.include_router(api_router, prefix="/api/v1")
     return app
 

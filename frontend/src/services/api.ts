@@ -22,9 +22,13 @@ import type {
 } from "../types/api";
 import type { HealthResponse } from "../types/health";
 
-const API_BASE_URL = (
+const rawBaseUrl = (
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1"
-).replace(/\/$/, "");
+).replace(/\/+$/, "");
+
+const API_BASE_URL = rawBaseUrl.endsWith("/api/v1")
+  ? rawBaseUrl
+  : `${rawBaseUrl}/api/v1`;
 
 // ---------------------------------------------------------------------------
 // Error classes

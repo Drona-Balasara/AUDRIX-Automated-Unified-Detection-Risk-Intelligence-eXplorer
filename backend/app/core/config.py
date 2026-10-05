@@ -69,6 +69,25 @@ class Settings(BaseSettings):
     # file cannot force an unbounded response body.
     max_reported_errors: int = 100
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_database_url(cls, value: object) -> object:
+        """Handle Render postgres:// scheme and fallback to DATABASE_URL."""
+        import os
+
+        # If value is default SQLite or empty, check if DATABASE_URL was provided by Render
+        if not value or str(value) == f"sqlite:///{DEFAULT_DB_PATH.as_posix()}":
+            render_db = os.getenv("DATABASE_URL")
+            if render_db:
+                value = render_db
+
+        if isinstance(value, str):
+            value = value.strip()
+            # Render / Heroku supply postgres:// URLs, but SQLAlchemy 1.4+ requires postgresql://
+            if value.startswith("postgres://"):
+                return value.replace("postgres://", "postgresql://", 1)
+        return value
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_cors_origins(cls, value: object) -> object:
