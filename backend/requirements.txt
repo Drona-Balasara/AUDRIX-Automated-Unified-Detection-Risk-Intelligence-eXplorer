@@ -12,6 +12,11 @@ pydantic-settings>=2.3,<3
 
 # ORM (SQLAlchemy 2.x)
 SQLAlchemy>=2.0.30,<2.1
+# PostgreSQL driver (required for Render PostgreSQL deployment).
+# psycopg2-binary provides the compiled C extension; no separate PostgreSQL
+# client library installation is needed. When SATSA_DATABASE_URL is set to a
+# sqlite:// URL (local development), this driver is present but not loaded.
+psycopg2-binary>=2.9,<3
 
 # Testing
 pytest>=8.2,<9
